@@ -62,6 +62,7 @@ addBtn.onclick = openModal;
 closeBtn.onclick = closeModal;
 cancelBtn.onclick = function () {
   closeModal();
+  form.reset();
 };
 
 // Submit form
@@ -86,6 +87,18 @@ form.onsubmit = function (event) {
   renderTasks();
 };
 
+const handleComplete = (event) => {
+  event.closest(".task-card").classList.toggle("completed");
+
+  if (event.closest(".task-card").classList.contains("completed")) {
+    event.innerHTML = `<i class="fa-solid fa-check fa-icon"></i>
+            Mark as Active`;
+  } else {
+    event.innerHTML = `<i class="fa-solid fa-check fa-icon"></i>
+            Mark as Complete`;
+  }
+};
+
 // Render
 function renderTasks() {
   tasksBody.innerHTML = "";
@@ -104,7 +117,7 @@ function renderTasks() {
                   <i class="fa-solid fa-pen-to-square fa-icon"></i>
                   Edit
                 </div>
-                <div class="dropdown-item complete">
+                <div class="dropdown-item complete" onclick="handleComplete(this)">
                   <i class="fa-solid fa-check fa-icon"></i>
                   Mark as Active
                 </div>
