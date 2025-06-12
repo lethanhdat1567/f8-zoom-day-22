@@ -9,7 +9,18 @@
     <body>
         <!-- Font Awesome CDN -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+        <!-- Warning -->
+        <div class="warning">
+            <div class="warning-body">
+                <h3 class="warning-title">Bạn có chắc chắn?</h3>
+                <p class="warning-desc">Task sẽ bị xóa và sẽ không thể phục hồi.</p>
+                <div class="warning-btn-wrap">
+                    <button class="btn btn-error btn-cancel">Hủy bỏ</button>
+                    <button class="btn btn-primary btn-confirm">Tiếp tục</button>
+                </div>
+            </div>
+            <div class="warning-overlay"></div>
+        </div>
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -49,15 +60,15 @@
             <!-- Tabs -->
             <div class="tabs">
                 <div class="tab-list">
-                    <button class="tab-button active">Active Task</button>
-                    <button class="tab-button">Completed</button>
+                    <button class="tab-button active" data-status="all">All Task</button>
+                    <button class="tab-button" data-status="active">Active task</button>
+                    <button class="tab-button" data-status="completed">Completed</button>
                 </div>
             </div>
 
             <!-- Task Grid -->
             <div class="task-grid"></div>
         </main>
-
         <!-- Add New Task Modal -->
         <div class="modal-overlay" id="addTaskModal">
             <div class="modal">
@@ -72,6 +83,7 @@
                         <div class="form-group">
                             <label class="form-label" for="taskTitle">Task Title *</label>
                             <input type="text" id="taskTitle" class="form-input" placeholder="Enter task title" required name="title" />
+                            <p class="form-error">Task này đã bị trùng, vui lòng đổi tựa đề khác</p>
                         </div>
 
                         <div class="form-group">
@@ -144,6 +156,8 @@
                 </div>
             </div>
         </div>
+        <!-- Toast -->
+        <div id="toast"></div>
         <script src="main.js"></script>
     </body>
 </html>
