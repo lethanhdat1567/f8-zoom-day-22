@@ -1,127 +1,157 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
-const form = $(".todo-app-form");
-const modal = $("#addTaskModal");
-const firstInput = $(".form-input");
-const addBtn = $(".add-btn");
-const closeBtn = $(".modal-close");
-const cancelBtn = $("#cancelBtn");
+const form = $('.todo-app-form');
+const modal = $('#addTaskModal');
+const firstInput = $('.form-input');
+const tasksBody = $('.task-grid');
+const addBtn = $('.add-btn');
+const closeBtn = $('.modal-close');
+const cancelBtn = $('#cancelBtn');
 
-// Form input
-const titleInput = $("#taskTitle");
-const descriptionInput = $("#taskDescription");
-const categoryInput = $("#taskCategory");
-const priorityInput = $("#taskPriority");
-const startTimeInput = $("#startTime");
-const endTimeInput = $("#endTime");
-const dueDateInput = $("#taskDate");
-const cardColorInput = $("#taskColor");
-const tasksBody = $(".task-grid");
+let editIndex = null;
 
-const todoTask = [
-  {
-    title: "Client meeting",
-    description: "Discuss requirements with client",
-    category: "meeting",
-    priority: "medium",
-    startTime: "13:00",
-    endTime: "14:30",
-    DueDate: "2025-06-13",
-    cardColor: "blue",
-    isCompleted: true,
-  },
-  {
-    title: "Design homepage",
-    description: "Create responsive layout for homepage",
-    category: "design",
-    priority: "high",
-    startTime: "09:00",
-    endTime: "11:00",
-    DueDate: "2025-06-12",
-    cardColor: "purple",
-    isCompleted: false,
-  },
+const todoTask = JSON.parse(localStorage.getItem('todo')) || [
+    {
+        title: 'Client meeting',
+        description: 'Discuss requirements with client',
+        category: 'meeting',
+        priority: 'medium',
+        startTime: '13:00',
+        endTime: '14:30',
+        dueDate: '2025-06-13',
+        cardColor: 'blue',
+    },
+    {
+        title: 'Design homepage',
+        description: 'Create responsive layout for homepage',
+        category: 'design',
+        priority: 'high',
+        startTime: '09:00',
+        endTime: '11:00',
+        dueDate: '2025-06-12',
+        cardColor: 'purple',
+    },
 ];
-renderTasks();
 
 // Open/Close modal
 function openModal() {
-  modal.className = "modal-overlay show";
+    modal.className = 'modal-overlay show';
 
-  setTimeout(() => {
-    firstInput.focus();
-  }, 100);
+    setTimeout(() => {
+        firstInput.focus();
+    }, 100);
 }
 
 function closeModal() {
-  modal.className = "modal-overlay";
+    const modalTitle = modal.querySelector('.modal-title');
+    const editBtn = modal.querySelector('.btn-submit');
+    backToOriginalText(modalTitle);
+    backToOriginalText(editBtn);
+
+    modal.className = 'modal-overlay';
+
+    // Scroll top
+    const formAdd = modal.querySelector('.modal');
+    setTimeout(() => {
+        formAdd.scrollTop = 0;
+    }, 300);
+
+    form.reset();
+    editIndex = null;
 }
 
 addBtn.onclick = openModal;
 closeBtn.onclick = closeModal;
 cancelBtn.onclick = function () {
-  closeModal();
-  form.reset();
+    closeModal();
+};
+
+// Handle utils
+tasksBody.onclick = function (event) {
+    const editBtn = event.target.closest('.edit-btn');
+    const deleteBtn = event.target.closest('.delete-btn');
+    const completeBtn = event.target.closest('.complete-btn');
+
+    const taskItem = event.target.closest('.task-card');
+    const taskIndex = taskItem && taskItem.dataset.index;
+
+    if (editBtn) {
+        const task = todoTask[taskIndex];
+
+        // Fill input value
+        for (const key in task) {
+            if (key !== 'isCompleted') {
+                const input = $(`[name="${key}"]`);
+                input.value = task[key];
+            }
+        }
+        openModal();
+
+        // Change UI when update
+        const modalTitle = modal.querySelector('.modal-title');
+        const submitBtn = modal.querySelector('.btn-submit');
+
+        changeElementText(modalTitle, 'Edit Task');
+        changeElementText(submitBtn, 'Save');
+
+        editIndex = taskIndex;
+    }
+
+    if (deleteBtn) {
+        if (confirm('Bạn có chắc chắn muốn xóa')) {
+            todoTask.splice(taskIndex, 1);
+            updateTodo();
+        }
+    }
+
+    if (completeBtn) {
+        const task = todoTask[taskIndex];
+
+        task.isCompleted = !task.isCompleted;
+        updateTodo();
+    }
 };
 
 // Submit form
 form.onsubmit = function (event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  const newTask = {
-    title: titleInput.value,
-    description: descriptionInput.value,
-    category: categoryInput.value,
-    priority: priorityInput.value,
-    startTime: startTimeInput.value,
-    endTime: endTimeInput.value,
-    DueDate: dueDateInput.value,
-    cardColor: cardColorInput.value,
-    isCompleted: false,
-  };
+    const formData = Object.fromEntries(new FormData(form));
 
-  todoTask.unshift(newTask);
-  form.reset();
-  closeModal();
-  renderTasks();
+    if (editIndex) {
+        todoTask[editIndex] = formData;
+    } else {
+        formData.isCompleted = false;
+        todoTask.unshift(formData);
+    }
+
+    form.reset();
+    closeModal();
+    updateTodo();
 };
 
-const handleComplete = (event) => {
-  event.closest(".task-card").classList.toggle("completed");
-
-  if (event.closest(".task-card").classList.contains("completed")) {
-    event.innerHTML = `<i class="fa-solid fa-check fa-icon"></i>
-            Mark as Active`;
-  } else {
-    event.innerHTML = `<i class="fa-solid fa-check fa-icon"></i>
-            Mark as Complete`;
-  }
-};
-
-// Render
+// Render UI
 function renderTasks() {
-  tasksBody.innerHTML = "";
+    tasksBody.innerHTML = '';
 
-  const result = todoTask
-    .map(
-      (todo) => `<div class="task-card ${todo.cardColor} ${
-        todo.isCompleted ? "completed" : ""
-      }">
+    const result = todoTask
+        .map(
+            (todo, index) => `<div class="task-card ${todo.cardColor} ${todo.isCompleted ? 'completed' : ''}" data-index="${index}">
           <div class="task-header">
             <h3 class="task-title">${todo.title}</h3>
             <button class="task-menu">
               <i class="fa-solid fa-ellipsis fa-icon"></i>
               <div class="dropdown-menu">
-                <div class="dropdown-item">
+                <div class="dropdown-item edit-btn">
                   <i class="fa-solid fa-pen-to-square fa-icon"></i>
                   Edit
                 </div>
-                <div class="dropdown-item complete" onclick="handleComplete(this)">
+                <div class="dropdown-item complete complete-btn">
                   <i class="fa-solid fa-check fa-icon"></i>
-                  Mark as Active
+                 ${todo.isCompleted ? 'Mark as InActive' : 'Mark as Active'}
                 </div>
-                <div class="dropdown-item delete">
+                <div class="dropdown-item delete delete-btn">
                   <i class="fa-solid fa-trash fa-icon"></i>
                   Delete
                 </div>
@@ -131,22 +161,39 @@ function renderTasks() {
           <p class="task-description">
             ${todo.description}
           </p>
-          <div class="task-time">${padTime(todo.startTime)} - ${padTime(
-        todo.endTime
-      )}</div>
+          <div class="task-time">${padTime(todo.startTime)} - ${padTime(todo.endTime)}</div>
         </div>`
-    )
-    .join("");
+        )
+        .join('');
 
-  tasksBody.innerHTML = result;
+    tasksBody.innerHTML = result;
+}
+renderTasks();
+
+// utils
+function padTime(time) {
+    const hour = time.split(':')[0];
+
+    if (hour < 12) {
+        return time.padEnd(8, ' AM');
+    } else {
+        return time.padEnd(8, ' PM');
+    }
 }
 
-function padTime(time) {
-  const hour = time.split(":")[0];
+function changeElementText(element, content) {
+    if (element) {
+        element.dataset.original = element.textContent;
+        element.innerText = content;
+    }
+}
 
-  if (hour < 12) {
-    return time.padEnd(8, " AM");
-  } else {
-    return time.padEnd(8, " PM");
-  }
+function backToOriginalText(element) {
+    element.innerText = element.dataset.original || element.innerText;
+    delete element.dataset.original;
+}
+
+function updateTodo() {
+    renderTasks();
+    localStorage.setItem('todo', JSON.stringify(todoTask));
 }
