@@ -12,11 +12,13 @@
         <!-- Warning -->
         <div class="warning">
             <div class="warning-body">
-                <h3 class="warning-title">Bạn có chắc chắn?</h3>
-                <p class="warning-desc">Task sẽ bị xóa và sẽ không thể phục hồi.</p>
+                <h3 class="warning-title">Are you absolutely sure?</h3>
+                <p class="warning-desc">
+                    This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                </p>
                 <div class="warning-btn-wrap">
-                    <button class="btn btn-error btn-cancel">Hủy bỏ</button>
-                    <button class="btn btn-primary btn-confirm">Tiếp tục</button>
+                    <button class="btn btn-outline btn-cancel">Cancel</button>
+                    <button class="btn btn-primary btn-confirm">Continue</button>
                 </div>
             </div>
             <div class="warning-overlay"></div>
@@ -49,6 +51,7 @@
                 <div class="search-container">
                     <i class="fa-solid fa-magnifying-glass fa-icon search-icon"></i>
                     <input type="text" class="search-input" placeholder="Search List" />
+                    <i class="fa-regular fa-circle-xmark close-search-icon"></i>
                 </div>
 
                 <button class="add-btn">
@@ -72,87 +75,89 @@
         <!-- Add New Task Modal -->
         <div class="modal-overlay" id="addTaskModal">
             <div class="modal">
-                <div class="modal-header">
-                    <h2 class="modal-title">Add New Task</h2>
-                    <button class="modal-close">
-                        <i class="fa-solid fa-xmark fa-icon"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form class="todo-app-form">
-                        <div class="form-group">
-                            <label class="form-label" for="taskTitle">Task Title *</label>
-                            <input type="text" id="taskTitle" class="form-input" placeholder="Enter task title" required name="title" />
-                            <p class="form-error">Task này đã bị trùng, vui lòng đổi tựa đề khác</p>
-                        </div>
+                <div class="modal-wrap">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Add New Task</h2>
+                        <button class="modal-close">
+                            <i class="fa-solid fa-xmark fa-icon"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="todo-app-form">
+                            <div class="form-group">
+                                <label class="form-label" for="taskTitle">Task Title *</label>
+                                <input type="text" id="taskTitle" class="form-input" placeholder="Enter task title" required name="title" />
+                                <p class="form-error">This task title is already in use, please provide a different one.</p>
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="taskDescription">Description</label>
-                            <textarea
-                                id="taskDescription"
-                                class="form-textarea"
-                                placeholder="Enter task description"
-                                name="description"
-                            ></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label" for="taskDescription">Description</label>
+                                <textarea
+                                    id="taskDescription"
+                                    class="form-textarea"
+                                    placeholder="Enter task description"
+                                    name="description"
+                                ></textarea>
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="taskCategory">Category</label>
-                            <select id="taskCategory" class="form-select" name="category">
-                                <option value="">Select category</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="design">Design</option>
-                                <option value="development">Development</option>
-                                <option value="planning">Planning</option>
-                                <option value="client">Client Work</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label" for="taskCategory">Category</label>
+                                <select id="taskCategory" class="form-select" name="category">
+                                    <option value="">Select category</option>
+                                    <option value="meeting">Meeting</option>
+                                    <option value="design">Design</option>
+                                    <option value="development">Development</option>
+                                    <option value="planning">Planning</option>
+                                    <option value="client">Client Work</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="taskPriority">Priority</label>
-                            <select id="taskPriority" class="form-select" name="priority">
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label" for="taskPriority">Priority</label>
+                                <select id="taskPriority" class="form-select" name="priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Time Schedule</label>
-                            <div class="time-inputs">
-                                <div>
-                                    <label class="form-label" for="startTime">Start Time</label>
-                                    <input type="time" id="startTime" class="form-input" name="startTime" />
-                                </div>
-                                <div>
-                                    <label class="form-label" for="endTime">End Time</label>
-                                    <input type="time" id="endTime" class="form-input" name="endTime" />
+                            <div class="form-group">
+                                <label class="form-label">Time Schedule</label>
+                                <div class="time-inputs">
+                                    <div>
+                                        <label class="form-label" for="startTime">Start Time</label>
+                                        <input type="time" id="startTime" class="form-input" name="startTime" />
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="endTime">End Time</label>
+                                        <input type="time" id="endTime" class="form-input" name="endTime" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="taskDate">Due Date</label>
-                            <input type="date" id="taskDate" class="form-input" name="dueDate" />
-                        </div>
+                            <div class="form-group">
+                                <label class="form-label" for="taskDate">Due Date</label>
+                                <input type="date" id="taskDate" class="form-input" name="dueDate" />
+                            </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="taskColor">Card Color</label>
-                            <select id="taskColor" class="form-select" name="cardColor">
-                                <option value="blue">Blue</option>
-                                <option value="purple">Purple</option>
-                                <option value="yellow">Yellow</option>
-                                <option value="pink">Pink</option>
-                                <option value="green">Green</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                            <button type="submit" class="btn btn-primary btn-submit">Create Task</button>
-                        </div>
-                    </form>
+                            <div class="form-group">
+                                <label class="form-label" for="taskColor">Card Color</label>
+                                <select id="taskColor" class="form-select" name="cardColor">
+                                    <option value="blue">Blue</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="yellow">Yellow</option>
+                                    <option value="pink">Pink</option>
+                                    <option value="green">Green</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary btn-submit">Create Task</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

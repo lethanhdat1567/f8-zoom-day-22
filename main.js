@@ -10,8 +10,10 @@ const closeBtn = $('.modal-close');
 const cancelBtn = $('#cancelBtn');
 const tabs = $('.tabs');
 const searchInput = $('.search-input');
+const clearSearchBtn = $('.close-search-icon');
+
 const tabBtns = tabs.querySelectorAll('.tab-button');
-const formWrap = firstInput.closest('.form-group');
+const titleFormGroup = firstInput.closest('.form-group');
 const warning = $('.warning');
 
 let editIndex = null;
@@ -53,10 +55,11 @@ function openModal() {
 function closeModal() {
     const modalTitle = modal.querySelector('.modal-title');
     const editBtn = modal.querySelector('.btn-submit');
+
     backToOriginalText(modalTitle);
     backToOriginalText(editBtn);
 
-    formWrap.classList.remove('error');
+    titleFormGroup.classList.remove('error');
     modal.className = 'modal-overlay';
 
     // Scroll top
@@ -85,7 +88,6 @@ tasksBody.onclick = function (event) {
     if (editBtn) {
         const task = todoTask[taskIndex];
 
-        // Fill input value
         for (const key in task) {
             if (key !== 'isCompleted') {
                 const input = $(`[name="${key}"]`);
@@ -94,7 +96,6 @@ tasksBody.onclick = function (event) {
         }
         openModal();
 
-        // Change UI when update
         const modalTitle = modal.querySelector('.modal-title');
         const submitBtn = modal.querySelector('.btn-submit');
 
@@ -105,40 +106,52 @@ tasksBody.onclick = function (event) {
     }
 
     if (deleteBtn) {
-        warning.classList.add('active');
         const confirmBtn = warning.querySelector('.btn-confirm');
         const cancelBtn = warning.querySelector('.btn-cancel');
+
+        warning.classList.add('active');
+
         confirmBtn.onclick = function () {
             todoTask.splice(taskIndex, 1);
             updateTodo();
             warning.classList.remove('active');
             toast({
-                title: `Thành công`,
-                message: `Bạn đã xóa thành công.`,
+                title: `Success`,
+                message: `you are delete successfully.`,
                 type: 'success',
                 duration: 600,
             });
         };
+
         cancelBtn.onclick = function () {
             warning.classList.remove('active');
         };
+    }
+
+    if (completeBtn) {
+        const task = todoTask[taskIndex];
+        task.isCompleted = !task.isCompleted;
+        updateTodo();
     }
 };
 
 // Submit form
 form.onsubmit = function (event) {
     event.preventDefault();
+
     const formData = Object.fromEntries(new FormData(form));
     formData.isCompleted = false;
-    const newTitle = formData.title;
 
+    // Check duplicate
+    const newTitle = formData.title;
     const isDuplicate = todoTask.find((todo, index) => {
-        if (Number(editIndex) === index) return false;
+        if (editIndex && Number(editIndex) === index) return false;
+
         return todo.title === newTitle;
     });
 
     if (isDuplicate) {
-        formWrap.classList.add('error');
+        titleFormGroup.classList.add('error');
     } else {
         if (editIndex) {
             todoTask[editIndex] = formData;
@@ -146,12 +159,13 @@ form.onsubmit = function (event) {
             formData.isCompleted = false;
             todoTask.unshift(formData);
         }
-        formWrap.classList.remove('error');
+
+        titleFormGroup.classList.remove('error');
         closeModal();
         updateTodo();
         toast({
-            title: `Thành công`,
-            message: `Bạn đã ${editIndex ? 'cập nhật' : 'tạo'} thành công.`,
+            title: `Success`,
+            message: `You are ${editIndex ? 'update' : 'create'} successfully!.`,
             type: 'success',
             duration: 600,
         });
@@ -159,22 +173,6 @@ form.onsubmit = function (event) {
 };
 
 // Tabs
-tabs.onclick = function (event) {
-    const isSearching = !!searchInput.value;
-    if (!isSearching) {
-        const activeTabBtn = event.target.closest('.tab-button');
-        if (activeTabBtn) {
-            tabBtns.forEach((tab) => tab.classList.remove('active'));
-
-            activeTabBtn.classList.add('active');
-
-            const status = activeTabBtn.dataset.status;
-
-            TabsStatus[status]();
-        }
-    }
-};
-
 const TabsStatus = {
     all() {
         renderTasks();
@@ -189,18 +187,42 @@ const TabsStatus = {
     },
 };
 
+tabs.onclick = function (event) {
+    const isSearching = !!searchInput.value;
+
+    if (!isSearching) {
+        const activeTabBtn = event.target.closest('.tab-button');
+        if (activeTabBtn) {
+            tabBtns.forEach((tab) => tab.classList.remove('active'));
+
+            activeTabBtn.classList.add('active');
+
+            const status = activeTabBtn.dataset.status;
+
+            TabsStatus[status]();
+        }
+    }
+};
+
 //Search
 searchInput.oninput = function (event) {
+    // Back to all tab status
     tabBtns.forEach((tab) => tab.classList.remove('active'));
     tabBtns[0].classList.add('active');
 
-    const inputValue = event.target.value;
+    let inputValue = event.target.value;
 
     if (inputValue.trim()) {
+        clearSearchBtn.classList.add('active');
+
         const newTodoList = todoTask.filter((todo) => {
-            const todoTitle = todo.title.toLowerCase();
-            return todoTitle.includes(inputValue.toLowerCase());
+            const todoTitle = todo.title.trim().toLowerCase();
+            const todoDesc = todo.description.trim().toLowerCase();
+            const formatInput = inputValue.trim().toLowerCase();
+
+            return todoTitle.includes(formatInput) || todoDesc.includes(formatInput);
         });
+
         if (newTodoList.length > 0) {
             renderTasks(newTodoList);
         } else {
@@ -211,13 +233,17 @@ searchInput.oninput = function (event) {
                      class="empty-search_img"
                          src="./images/search-no-result-concept-illustration-flat-design-eps10-modern-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector-removebg-preview.png"
                     />
-                     <p class="empty-search_description">Không tìm thấy task :<</p>
+                     <p class="empty-search_description">Task not found :<</p>
             </div>
             `;
         }
+
+        clearSearchBtn.onclick = function () {
+            event.target.value = '';
+            clearSearch();
+        };
     } else {
-        tasksBody.classList.remove('empty');
-        renderTasks();
+        clearSearch();
     }
 };
 
@@ -251,7 +277,10 @@ function renderTasks(tasks = todoTask) {
           <p class="task-description">
             ${todo.description}
           </p>
-          <div class="task-time">${padTime(todo.startTime)} - ${padTime(todo.endTime)}</div>
+          <div class="task-time-wrap">
+            <div class="task-time">${padTime(todo.startTime)} - ${padTime(todo.endTime)}</div>
+            <div class="task-due-time">Due to: ${todo.dueDate ? todo.dueDate : 'Empty'}</div>
+          </div>
         </div>`
         )
         .join('');
@@ -260,7 +289,7 @@ function renderTasks(tasks = todoTask) {
 }
 renderTasks();
 
-// utils
+// Utils
 function padTime(time) {
     const hour = time.split(':')[0];
     if (time) {
@@ -270,7 +299,7 @@ function padTime(time) {
             return time.padEnd(8, ' PM');
         }
     } else {
-        return 'Rỗng';
+        return 'Empty';
     }
 }
 
@@ -289,6 +318,12 @@ function backToOriginalText(element) {
 function updateTodo() {
     renderTasks();
     localStorage.setItem('todo', JSON.stringify(todoTask));
+}
+
+function clearSearch() {
+    clearSearchBtn.classList.remove('active');
+    tasksBody.classList.remove('empty');
+    renderTasks();
 }
 
 function toast({ title = '', message = '', type = 'info', duration = 3000 }) {
