@@ -45,7 +45,7 @@ const todoTask = JSON.parse(localStorage.getItem('todo')) || [
 
 // Open/Close modal
 function openModal() {
-    modal.className = 'modal-overlay show';
+    modal.classList.add('show');
 
     setTimeout(() => {
         firstInput.focus();
@@ -60,7 +60,7 @@ function closeModal() {
     backToOriginalText(editBtn);
 
     titleFormGroup.classList.remove('error');
-    modal.className = 'modal-overlay';
+    modal.classList.remove('show');
 
     // Scroll top
     const formAdd = modal.querySelector('.modal');
@@ -253,9 +253,11 @@ function renderTasks(tasks = todoTask) {
 
     const result = tasks
         .map(
-            (todo, index) => `<div class="task-card ${todo.cardColor} ${todo.isCompleted ? 'completed' : ''}" data-index="${index}">
+            (todo, index) => `<div class="task-card ${escapeHTML(todo.cardColor)} ${
+                todo.isCompleted ? 'completed' : ''
+            }" data-index="${index}">
           <div class="task-header">
-            <h3 class="task-title">${todo.title}</h3>
+            <h3 class="task-title">${escapeHTML(todo.title)}</h3>
             <button class="task-menu">
               <i class="fa-solid fa-ellipsis fa-icon"></i>
               <div class="dropdown-menu">
@@ -265,7 +267,7 @@ function renderTasks(tasks = todoTask) {
                 </div>
                 <div class="dropdown-item complete complete-btn">
                   <i class="fa-solid fa-check fa-icon"></i>
-                 ${todo.isCompleted ? 'Mark as InActive' : 'Mark as Active'}
+                 ${escapeHTML(todo.isCompleted) ? 'Mark as InActive' : 'Mark as Active'}
                 </div>
                 <div class="dropdown-item delete delete-btn">
                   <i class="fa-solid fa-trash fa-icon"></i>
@@ -275,11 +277,11 @@ function renderTasks(tasks = todoTask) {
             </button>
           </div>
           <p class="task-description">
-            ${todo.description}
+            ${escapeHTML(todo.description)}
           </p>
           <div class="task-time-wrap">
-            <div class="task-time">${padTime(todo.startTime)} - ${padTime(todo.endTime)}</div>
-            <div class="task-due-time">Due to: ${todo.dueDate ? todo.dueDate : 'Empty'}</div>
+            <div class="task-time">${padTime(escapeHTML(todo.startTime))} - ${padTime(escapeHTML(todo.endTime))}</div>
+            <div class="task-due-time">Due to: ${escapeHTML(todo.dueDate) ? escapeHTML(todo.dueDate) : 'Empty'}</div>
           </div>
         </div>`
         )
@@ -370,4 +372,11 @@ function toast({ title = '', message = '', type = 'info', duration = 3000 }) {
                 `;
         main.appendChild(toast);
     }
+}
+
+function escapeHTML(html) {
+    const tempElement = document.createElement('div');
+    tempElement.textContent = html;
+
+    return tempElement.innerHTML;
 }
